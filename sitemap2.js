@@ -1,211 +1,147 @@
-/** 
- * Sitemap2 - URL: http://longkool1102.blogspot.com
-**/
-var tocConfig = {
-    url: "",
-    feedNum: 6,
-    labelName: (window.location.hash && window.location.hash != "#0" && window.location.hash != "#search") ? encodeURIComponent(window.location.hash.substr(1)) : false,
-    numChars: 140,
-    thumbWidth: 70,
-    navText: "Tải thêm &#9660;",
-    frontText: "Lên đầu &uArr;",
-    noImage: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAA3NCSVQICAjb4U/gAAAADElEQVQImWOor68HAAL+AX7vOF2TAAAAAElFTkSuQmCC",
-    loading: "<span>Đang tải...</span>",
-    searching: "<span>Đang tìm kiếm...</span>",
-    MonthNames: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
-    noResult: "No Result"
-};
+(function(win, doc) {
 
-function getID(b) {
-    return document.getElementById(b)
-}
-var head = document.getElementsByTagName("head")[0],
-    tocContainer = getID("feedContainer"),
-    feedNav = getID("feedNav"),
-    orderByer = getID("orderFeedBy"),
-    labelSorter = getID("labelSorter"),
-    input = getID("postSearcher").getElementsByTagName("input")[0],
-    resultDesc = getID("resultDesc"),
-    nextPage, feedArchive, startPage = 0;
+    var hash = (new Date()).getTime(),
+        defaults = {
+        blogUrl: "https://www.longkool1102.blogspot.com", // Blog URL
+        containerId: "tabbed-toc", // Container ID
+        activeTab: 1, // The default active tab index (default: the first tab)
+        showDates: false, // true to show the post date
+        showSummaries: false, // true to show the posts summaries
+        numChars: 200, // Number of summary chars
+        showThumbnails: false, // true to show the posts thumbnails (Not recommended)
+        thumbSize: 40, // Thumbnail size
+        noThumb: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAA3NCSVQICAjb4U/gAAAADElEQVQImWOor68HAAL+AX7vOF2TAAAAAElFTkSuQmCC", // No thumbnail URL
+        monthNames: [ // Array of month names
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember"
+        ],
+        newTabLink: true, // Open link in new window?
+        maxResults: 99999, // Maximum posts result
+        preload: 0, // Load the feed after 0 seconds (option => time in milliseconds || "onload")
+        sortAlphabetically: true, // `false` to sort posts by date
+        showNew: false, // `false` to hide the "New!" mark in most recent posts, or define how many recent posts are to be marked
+        newText: ' &ndash; <em style="color:red;">Baru!</em>' // HTML for the "New!" text
+    };
 
-function cropFeed(d, c) {
-    var f = d.split("<");
-    for (var e = 0; e < f.length; e++) {
-        if (f[e].indexOf(">") != -1) {
-            f[e] = f[e].substring(f[e].indexOf(">") + 1, f[e].length)
-        }
-    }
-    f = f.join(" ");
-    f = f.substring(0, c - 1);
-    return f
-}
-function showLabels(c) {
-    var a = c.feed.category,
-        d = "";
-    d = "<select id='labelSorter' onchange='changeSort(this.value);'>";
-    d += "<option value='' selected>Chủ đề...</option>";
-    for (var b = 0; b < a.length; b++) {
-        d += "<option value='" + decodeURIComponent(a[b].term) + "'>" + a[b].term.toUpperCase() + "</option>"
-    }
-    d += "</select>";
-    labelSorter.innerHTML = d
-}
-function showFeedList(t) {
-    var m = t.feed.entry,
-        o, s, n, h, e, u, g, p, r, q, c = "";
-    if (typeof (t.feed.entry) !== "undefined") {
-        for (var f = 0; f < tocConfig.feedNum; f++) {
-            o = (m) ? m[f] : "", nextPage = "";
-            if (f == t.feed.entry.length) {
-                break
-            }
-            s = o.title.$t;
-            for (var d = 0; d < o.link.length; d++) {
-                if (o.link[d].rel == "alternate") {
-                    n = o.link[d].href;
-                    break
-                }
-            }
-            for (var b = 0; b < t.feed.link.length; b++) {
-                if (t.feed.link[b].rel == "next") {
-                    nextPage = t.feed.link[b].href
-                }
-            }
-            for (var a = 0; a < o.link.length; a++) {
-                if (o.link[a].rel == "replies" && o.link[a].type == "text/html") {
-                    q = o.link[a].title;
-                    break
-                }
-            }
-            if ("content" in o) {
-                e = o.content.$t
-            } else {
-                if ("summary" in o) {
-                    e = o.summary.$t
-                } else {
-                    e = ""
-                }
-            }
-            if ("media$thumbnail" in o) {
-                h = o.media$thumbnail.url.replace(/\/s[0-9]+\-c/, "/s" + tocConfig.thumbWidth + "-c")
-            } else {
-                h = tocConfig.noImage.replace(/\/s[0-9]+\-c/, "/s" + tocConfig.thumbWidth + "-c")
-            }
-            postdate = o.published.$t.substring(0, 10), u = postdate.substring(0, 4), g = postdate.substring(5, 7), p = postdate.substring(8, 10), r = tocConfig.MonthNames[parseInt(g, 10) - 1];
-            c += "<li><div class='inner'>";
-            c += "<a href='" + n + "' target='_blank'><img style='width:" + tocConfig.thumbWidth + "px;height:" + tocConfig.thumbWidth + "px;' src='" + h + "' alt='" + s + "' /></a>";
-            c += "<a class='toc-title' href='" + n + "' target='_blank'>" + s + "</a><strong> - (" + q + ")</strong><br>";
-            c += "<div class='news-text'>" + cropFeed(e, tocConfig.numChars) + "&hellip;<br style='clear:both;'/></div>";
-            c += '<div class="date"><span class="dd">' + p + '</span><span class="dm">' + r + '</span><span class="dy">' + u + "</span></div></div></li>"
-        }
-        if (input.value !== "" && window.location.hash == "#search") {
-            resultDesc.innerHTML = "<span>Search result for keyword <strong>&quot;" + input.value + "&quot;</strong></span>"
-        } else {
-            resultDesc.innerHTML = ""
-        }
-        feedContainer.innerHTML += c;
-        if (nextPage) {
-            if (window.location.hash && window.location.hash !== "#0") {
-                c = "<a href='javascript:initResult(2);' class='next'>" + tocConfig.navText + "</a>"
-            } else {
-                c = "<a href='javascript:initResult(1);' class='next'>" + tocConfig.navText + "</a>"
-            }
-        } else {
-            c = "<a href='#table-outer' onclick='jQuery(&apos;html, body&apos;).animate({scrollTop: jQuery(&apos;#table-outer&apos;).offset().top}, 1500); return false' class='front'>" + tocConfig.frontText + "</a>"
-        }
-        feedNav.innerHTML = c;
-        input.value = "";
-        labelSorter.getElementsByTagName("select")[0].removeAttribute("disabled");
-        orderByer.removeAttribute("disabled")
+    if (typeof tabbedTOC === "undefined") {
+        tabbedTOC = defaults;
     } else {
-        feedContainer.innerHTML = "";
-        alert(tocConfig.noResult);
-        feedNav.innerHTML = "<a href='?reload=true'>" + tocConfig.frontText + "</a>";
-        searchDesc.innerHTML = ""
-    }
-}
-function initResult(a) {
-    var b, c;
-    if (a == 1) {
-        b = nextPage.indexOf("?");
-        c = nextPage.substring(b)
-    } else {
-        if (a == 2) {
-            b = nextPage.indexOf("?");
-            c = nextPage.substring(b).replace(/\?/, "/-/" + window.location.hash.substr(1) + "?")
-        } else {
-            c = "?start-index=1&max-results=" + tocConfig.feedNum + "&orderby=" + orderByer.value + "&alt=json-in-script"
+        for (var i in defaults) {
+            defaults[i] = typeof tabbedTOC[i] !== "undefined" ? tabbedTOC[i] : defaults[i];
         }
     }
-    c += "&callback=showFeedList";
-    updateScript(c)
-}
-function removeScript() {
-    var a = getID("temporer-script");
-    a.parentNode.removeChild(a)
-}
-function buildLabels() {
-    var a = document.createElement("script");
-    a.type = "text/javascript";
-    a.src = (tocConfig.url === "" ? window.location.protocol + "//" + window.location.host : tocConfig.url) + "/feeds/posts/summary?max-results=0&alt=json-in-script&callback=showLabels";
-    head.appendChild(a)
-}
-function updateScript(b) {
-    if (startPage == 1) {
-        removeScript()
-    }
-    feedNav.innerHTML = tocConfig.loading;
-    if (tocConfig.labelName !== false) {
-        feedArchive = (tocConfig.url === "" ? window.location.protocol + "//" + window.location.host : tocConfig.url) + "/feeds/posts/summary/-/" + tocConfig.labelName + b
+
+    win['clickTabs_' + hash] = function(pos) {
+        var a = document.getElementById(defaults.containerId),
+            b = a.getElementsByTagName('ol'),
+            c = a.getElementsByTagName('ul')[0],
+            d = c.getElementsByTagName('a');
+        for (var t = 0, ten = b.length; t < ten; ++t) {
+            b[t].style.display = "none";
+            b[parseInt(pos, 10)].style.display = "block";
+        }
+        for (var u = 0, uen = d.length; u < uen; ++u) {
+            d[u].className = "";
+            d[parseInt(pos, 10)].className = "active-tab";
+        }
+    };
+
+    win['showTabs_' + hash] = function(json) {
+
+        var total = parseInt(json.feed.openSearch$totalResults.$t, 10),
+            c = defaults,
+            entry = json.feed.entry,
+            category = json.feed.category,
+            skeleton = "",
+            newPosts = [];
+
+        for (var g = 0; g < (c.showNew === true ? 5 : c.showNew); ++g) {
+            if (g === entry.length) break;
+            entry[g].title.$t = entry[g].title.$t + (c.showNew !== false ? c.newText : "");
+        }
+
+        entry = c.sortAlphabetically ? entry.sort(function(a, b) {
+            return a.title.$t.localeCompare(b.title.$t);
+        }) : entry;
+
+        category = c.sortAlphabetically ? category.sort(function(a, b) {
+            return a.term.localeCompare(b.term);
+        }) : category;
+
+        // Build the tabs skeleton
+        skeleton = '<span class="toc-line"></span><ul class="toc-tabs">';
+        for (var h = 0, cen = category.length; h < cen; ++h) {
+            skeleton += '<li class="toc-tab-item-' + h + '"><a onclick="clickTabs_' + hash + '(' + h + ');return false;" onmousedown="return false;" href="javascript:;">' + category[h].term + '</a></li>';
+        }
+        skeleton += '</ul>';
+
+        // Bulid the tabs contents skeleton
+        skeleton += '<div class="toc-content">';
+        for (var i = 0, cen = category.length; i < cen; ++i) {
+            skeleton += '<ol class="panel" data-category="' + category[i].term + '"';
+            skeleton += (i != (c.activeTab-1)) ? ' style="display:none;"' : '';
+            skeleton += '>';
+            for (var j = 0; j < total; ++j) {
+                if (j === entry.length) break;
+                var link, entries = entry[j],
+                    pub = entries.published.$t, // Get the post date
+                    month = c.monthNames, // Month array from the configuration
+                    title = entries.title.$t, // Get the post title
+                    summary = ("summary" in entries && c.showSummaries === true) ? entries.summary.$t.replace(/<br *\/?>/g," ").replace(/<.*?>/g,"").replace(/[<>]/g,"").substring(0, c.numChars) + '&hellip;' : "", // Get the post summary
+                    img = ("media$thumbnail" in entries && c.showThumbnails === true) ? '<img class="thumbnail" style="width:' + c.thumbSize + 'px;height:' + c.thumbSize + 'px;" alt="" src="' + entries.media$thumbnail.url.replace(/\/s\d(\-c)?\//,"/s" + c.thumbSize + "-c/") + '"/>' : '<img class="thumbnail" style="width:' + c.thumbSize + 'px;height:' + c.thumbSize + 'px;" alt="" src="' + c.noThumb.replace(/\/s\d(\-c)?\//,"/s" + c.thumbSize + "-c/") + '"/>', // Get the post thumbnail
+                    cat = entries.category || [], // Post categories
+                    date = c.showDates ? '<time datetime="' + pub + '" title="' + pub + '">' + pub.substring(8, 10) + ' ' + month[parseInt(pub.substring(5, 7), 10) - 1] + ' ' + pub.substring(0, 4) + '</time>' : ""; // Formated published date
+                    
+                for (var k = 0, ken = entries.link.length; k < ken; ++k) {
+                    if (entries.link[k].rel === "alternate") {
+                        link = entries.link[k].href; // Get the post URL
+                        break;
+                    }
+                }
+                for (var l = 0, check = cat.length; l < check; ++l) {
+                    var target = c.newTabLink ? ' target="_blank"' : ""; // Open link in new window?
+                    // Write the list skeleton only if at least one of the post...
+                    // ... has the same category term with one of the current categories term list
+                    if (cat[l].term === category[i].term) {
+                        skeleton += '<li title="' + cat[l].term + '"';
+                        skeleton += c.showSummaries ? ' class="bold"' : "";
+                        skeleton += '><a href="' + link + '"' + target + '>' + title + date + '</a>';
+                        skeleton += c.showSummaries ? '<span class="summary">' + img + summary + '<span style="display:block;clear:both;"></span></span>' : "";
+                        skeleton += '</li>';
+                    }
+                }
+            }
+            skeleton += '</ol>';
+        }
+
+        skeleton += '</div>';
+        skeleton += '<div style="clear:both;"></div>';
+        doc.getElementById(c.containerId).innerHTML = skeleton;
+        win['clickTabs_' + hash](c.activeTab - 1);
+
+    };
+
+    var h = doc.getElementsByTagName('head')[0],
+        s = doc.createElement('script');
+        s.src = defaults.blogUrl.replace(/\/+$|[\?&#].*$/g, "") + '/feeds/posts/summary?alt=json-in-script&max-results=' + defaults.maxResults + '&orderby=published&callback=showTabs_' + hash;
+    if (defaults.preload !== "onload") {
+        win.setTimeout(function() {
+            h.appendChild(s);
+        }, defaults.preload);
     } else {
-        feedArchive = (tocConfig.url === "" ? window.location.protocol + "//" + window.location.host : tocConfig.url) + "/feeds/posts/summary" + b
+        win.onload = function() {
+            h.appendChild(s);
+        };
     }
-    var a = document.createElement("script");
-    a.type = "text/javascript";
-    a.src = feedArchive;
-    a.id = "temporer-script";
-    head.appendChild(a);
-    startPage = 1
-}
-function changeSort(c) {
-    removeScript();
-    tocContainer.innerHTML = "";
-    feedNav.innerHTML = tocConfig.loading;
-    var b = document.createElement("script"),
-        d = labelSorter.getElementsByTagName("select")[0],
-        a = (c !== 0) ? "/-/" + c : "";
-    b.type = "text/javascript";
-    b.id = "temporer-script";
-    b.src = (tocConfig.url === "" ? window.location.protocol + "//" + window.location.host : tocConfig.url) + "/feeds/posts/summary" + a + "?alt=json-in-script&max-results=" + tocConfig.feedNum + "&orderby=" + orderByer.value + "&callback=showFeedList";
-    head.appendChild(b);
-    d.disabled = true;
-    orderByer.disabled = true;
-    window.location.hash = c
-}
-function searchPost() {
-    removeScript();
-    tocContainer.innerHTML = "";
-    resultDesc.innerHTML = "";
-    feedNav.innerHTML = tocConfig.searching;
-    var a = document.createElement("script");
-    a.type = "text/javascript";
-    a.id = "temporer-script";
-    a.src = (tocConfig.url === "" ? window.location.protocol + "//" + window.location.host : tocConfig.url) + "/feeds/posts/summary?alt=json-in-script&orderby=published&q=" + input.value + "&max-results=9999&callback=showFeedList";
-    head.appendChild(a);
-    window.location.hash = "#search";
-    return false
-}
-getID("postSearcher").onsubmit = function () {
-    return searchPost()
-};
-orderByer.onchange = function () {
-    changeSort(0)
-};
-labelSorter.getElementsByTagName("select")[0].onchange = function () {
-    changeSort(this.value)
-};
-window.onload = function () {
-    initResult(0);
-    buildLabels();
-    window.location.hash = "#0"
-};
+
+})(window, document);
