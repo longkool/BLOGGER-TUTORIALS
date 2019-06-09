@@ -1,6 +1,6 @@
-/**
- * URL: http://longkool1102.blogspot.com
- */
+/** 
+ * Sitemap2 - URL: http://longkool1102.blogspot.com
+**/
 var tocConfig = {
     url: "",
     feedNum: 6,
